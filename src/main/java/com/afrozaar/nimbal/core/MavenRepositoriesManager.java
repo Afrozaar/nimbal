@@ -12,6 +12,7 @@ import org.eclipse.aether.internal.impl.slf4j.Slf4jLoggerFactory;
 import org.eclipse.aether.repository.Authentication;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RemoteRepository.Builder;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
@@ -25,6 +26,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 public class MavenRepositoriesManager {
 
@@ -55,23 +58,62 @@ public class MavenRepositoriesManager {
     RepositorySystemSession stabilisedSession;
 
     public MavenRepositoriesManager() {
-        repoSystem = initRepositorySystem();
-        Authentication authentication = new AuthenticationBuilder()
-                .addUsername(moduleRepositoryUsername)
-                .addPassword(moduleRepositoryPassword)
-                .build();
-        releaseRepository = new RemoteRepository.Builder("release", "default", releaseModuleRepositoryUrl)
-                .setSnapshotPolicy(DISABLED_REPOSITORY_POLICY)
-                .setReleasePolicy(ENABLED_RELEASE_POLICY)
-                .setAuthentication(authentication)
-                .build();
-        snapshotRepository = new RemoteRepository.Builder("snapshot", "default", snapshotModuleRepositoryUrl)
-                .setSnapshotPolicy(ENABLED_SNAPSHOT_POLICY)
-                .setReleasePolicy(DISABLED_REPOSITORY_POLICY)
-                .setAuthentication(authentication)
-                .build();
-        LOG.debug("done initialising repo system");
 
+    }
+
+    /**
+     * the minimum required setup is the release module repository url
+     * @param releaseModuleRepositoryUrl
+     */
+    public MavenRepositoriesManager(String releaseModuleRepositoryUrl) {
+        super();
+        this.releaseModuleRepositoryUrl = releaseModuleRepositoryUrl;
+    }
+
+    public MavenRepositoriesManager(String releaseModuleRepositoryUrl, String snapshotModuleRepositoryUrl, String moduleRepositoryUsername,
+            String moduleRepositoryPassword) {
+        super();
+        this.releaseModuleRepositoryUrl = releaseModuleRepositoryUrl;
+        this.snapshotModuleRepositoryUrl = snapshotModuleRepositoryUrl;
+        this.moduleRepositoryUsername = moduleRepositoryUsername;
+        this.moduleRepositoryPassword = moduleRepositoryPassword;
+    }
+
+    @PostConstruct
+    public void init() {
+        repoSystem = initRepositorySystem();
+
+        Authentication authentication = null;
+        if (moduleRepositoryUsername != null && moduleRepositoryPassword != null) {
+            authentication = new AuthenticationBuilder()
+                    .addUsername(moduleRepositoryUsername)
+                    .addPassword(moduleRepositoryPassword)
+                    .build();
+        }
+
+        if (releaseModuleRepositoryUrl == null) {
+            throw new IllegalArgumentException("cannot have a null release module url");
+        }
+        {
+            Builder builder = new RemoteRepository.Builder("release", "default", releaseModuleRepositoryUrl)
+                    .setSnapshotPolicy(DISABLED_REPOSITORY_POLICY)
+                    .setReleasePolicy(ENABLED_RELEASE_POLICY);
+            if (authentication != null) {
+                builder.setAuthentication(authentication);
+            }
+            releaseRepository = builder.build();
+        }
+
+        if (snapshotModuleRepositoryUrl != null) {
+            Builder builder = new RemoteRepository.Builder("snapshot", "default", snapshotModuleRepositoryUrl)
+                    .setSnapshotPolicy(ENABLED_SNAPSHOT_POLICY)
+                    .setReleasePolicy(DISABLED_REPOSITORY_POLICY);
+            if (authentication != null) {
+                builder.setAuthentication(authentication);
+            }
+            snapshotRepository = builder.build();
+        }
+        LOG.debug("done initialising repo system");
     }
 
     public RepositorySystem initRepositorySystem() {
