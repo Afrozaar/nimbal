@@ -1,6 +1,7 @@
 package com.afrozaar.nimbal.core;
 
 import com.afrozaar.nimbal.annotations.Module;
+import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -30,10 +31,12 @@ public class ContextLoader {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextLoader.class);
 
     private MavenRepositoriesManager repositoriesManager;
+    private ClassLoaderFactory classLoaderFactory;
 
-    public ContextLoader(MavenRepositoriesManager repositoriesManager) {
+    public ContextLoader(MavenRepositoriesManager repositoriesManager, ClassLoaderFactory classLoaderFactory) {
         super();
         this.repositoriesManager = repositoriesManager;
+        this.classLoaderFactory = classLoaderFactory;
     }
 
     public DependencyNode refreshDependencies(MavenCoords mavenCoords) throws ErrorLoadingArtifactException {
@@ -94,9 +97,9 @@ public class ContextLoader {
         return urls;
     }
 
-    public ModuleInfo getModuleAnnotation(MavenCoords t, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
+    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
             ErrorLoadingArtifactException {
-        ClassLoader loader = getClassLoader(t.getArtifactId(), new ModuleInfo(), jars);
+        ClassLoader loader = classLoaderFactory.getClassLoader(artifactId, new ModuleInfo(), jars);
 
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(mainJar)
@@ -115,7 +118,7 @@ public class ContextLoader {
             // need to use module.inf to find module class name
             LOG.info("no module annotation found, using module.inf to lookup module class");
             Enumeration<URL> resourceAsStream = loader.getResources("module.inf");
-            Optional<URL> foundUrl = Collections.list(resourceAsStream).stream().filter(u -> u.toString().contains(t.artifactId)).findFirst();
+            Optional<URL> foundUrl = Collections.list(resourceAsStream).stream().filter(u -> u.toString().contains(artifactId)).findFirst();
 
             if (foundUrl.isPresent()) {
                 try (InputStream openStream = foundUrl.get().openStream()) {

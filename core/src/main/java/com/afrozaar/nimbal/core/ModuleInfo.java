@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
-class ModuleInfo {
+public class ModuleInfo {
     private Integer order;
     private String name;
     private String parentModule;
@@ -29,19 +29,19 @@ class ModuleInfo {
         this.moduleClass = moduleClass.getName();
     }
 
-    Integer order() {
+    public Integer order() {
         return order;
     }
 
-    String name() {
+    public String name() {
         return name;
     }
 
-    String parentModule() {
+    public String parentModule() {
         return parentModule;
     }
 
-    String[] ringFenceFilters() {
+    public String[] ringFenceFilters() {
         return ringFencedFilters;
     }
 

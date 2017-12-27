@@ -23,7 +23,7 @@ public class ContextLoaderTest {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextLoaderTest.class);
 
     @Test
-    public void Go() throws ErrorLoadingArtifactException, IOException {
+    public void CheckDependenciesGetLoaded() throws ErrorLoadingArtifactException, IOException {
 
         Path path = Paths.get(System.getProperty("user.dir"), "maven-repo", "m2");
         try {
@@ -38,7 +38,7 @@ public class ContextLoaderTest {
         manager.setM2Folder("m2");
         manager.init();
 
-        ContextLoader loader = new ContextLoader(manager);
+        ContextLoader loader = new ContextLoader(manager, null);
 
         loader.refreshDependencies(new MavenCoords("com.google.guava", "guava", "23.5-jre"));
 
@@ -54,6 +54,7 @@ public class ContextLoaderTest {
         Set<Path> collect = StreamSupport.stream(breadthFirst.spliterator(), false).collect(toSet());
 
         assertThat(collect).containsAll(builder.build());
-
     }
+    
+    
 }

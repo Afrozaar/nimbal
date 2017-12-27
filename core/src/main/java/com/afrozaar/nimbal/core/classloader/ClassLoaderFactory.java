@@ -1,4 +1,8 @@
-package com.afrozaar.nimbal.core;
+package com.afrozaar.nimbal.core.classloader;
+
+import com.afrozaar.nimbal.core.ErrorLoadingArtifactException;
+import com.afrozaar.nimbal.core.IRegistry;
+import com.afrozaar.nimbal.core.ModuleInfo;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,7 +15,7 @@ public class ClassLoaderFactory {
 
     private IRegistry registry;
 
-    private ClassLoader getClassLoader(String artifactId, ModuleInfo moduleInfo, URL[] urls) throws ErrorLoadingArtifactException {
+    ClassLoader getClassLoader(String artifactId, ModuleInfo moduleInfo, URL[] urls) throws ErrorLoadingArtifactException {
         String parentName = moduleInfo.parentModule();
         if (parentName == null) {
             parentName = StringUtils.stripToNull(moduleInfo.parentModuleClassesOnly());
@@ -22,9 +26,10 @@ public class ClassLoaderFactory {
         }
         LOG.debug("creating class loader for {}, artifactId:{} with parent ='{}' ringFenceBlackList:{} and jar list {}", moduleInfo.name(), artifactId,
                 moduleInfo.parentModule(), Arrays.asList(moduleInfo.ringFenceFilters()), Arrays.asList(urls));
-        
-        ClassLoader classLoader = loader.getClassLoader(urls, parentName != null ? registry.getClassLoader(parentName) : this.getClass().getClassLoader(),
-                artifactId, moduleInfo.ringFenceClassBlackListRegex());
+
+        URLClassLoaderExtension classLoader = new URLClassLoaderExtension(urls, parentName != null ? registry.getClassLoader(parentName)
+                : this.getClass().getClassLoader(), artifactId);
+        classLoader.setRingFencedFilters(Arrays.asList(moduleInfo.ringFenceFilters()));
 
         return classLoader;
     }
