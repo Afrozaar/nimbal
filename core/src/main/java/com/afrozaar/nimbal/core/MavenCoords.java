@@ -3,9 +3,9 @@ package com.afrozaar.nimbal.core;
 import static java.lang.String.format;
 
 public class MavenCoords {
-    public String groupId;
-    public String artifactId;
-    public String version;
+    private String groupId;
+    private String artifactId;
+    private String version;
 
     public MavenCoords(String groupId, String artifactId, String version) {
         this.groupId = groupId;
@@ -66,5 +66,17 @@ public class MavenCoords {
 
     public boolean isSnapshot() {
         return version != null && version.endsWith("SNAPSHOT");
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

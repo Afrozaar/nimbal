@@ -1,5 +1,7 @@
 package com.afrozaar.nimbal.core;
 
+import com.afrozaar.nimbal.annotations.Module;
+
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -10,6 +12,18 @@ import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.graph.visitor.PreorderNodeListGenerator;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
 
 public class ContextLoader {
 
@@ -22,7 +36,7 @@ public class ContextLoader {
         this.repositoriesManager = repositoriesManager;
     }
 
-    public void refreshDependencies(MavenCoords mavenCoords) throws ErrorLoadingArtifactException {
+    public DependencyNode refreshDependencies(MavenCoords mavenCoords) throws ErrorLoadingArtifactException {
         LOG.debug("initialising repo session");
         RepositorySystemSession session = repositoriesManager.newSession(mavenCoords);
 
@@ -53,6 +67,67 @@ public class ContextLoader {
             LOG.error("dependency error ", e);
             throw new ErrorLoadingArtifactException(e.getMessage(), e);
         }
+        return node;
 
     }
+
+    public void doYourThing(DependencyNode node) {
+        LOG.debug("searching for annotated module");
+        URL url = new URL("file", null, node.getArtifact().getFile().getAbsolutePath());
+        LOG.debug("adding url {}", url);
+
+        URL[] jars = getJars(node);
+        ModuleInfo module = getModuleAnnotation(mavenCoords, url, jars);
+    }
+
+    public URL[] getJars(DependencyNode node) {
+        PreorderNodeListGenerator nlg = new PreorderNodeListGenerator();
+        node.accept(nlg);
+        URL[] urls = nlg.getFiles().stream().map(file -> {
+            try {
+                return new URL("file", null, file.getAbsolutePath());
+            } catch (MalformedURLException e) {
+                LOG.info("error creating url file {}", file, e);
+                return null;
+            }
+        }).filter(Objects::nonNull).toArray(URL[]::new);
+        return urls;
+    }
+
+    public ModuleInfo getModuleAnnotation(MavenCoords t, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
+            ErrorLoadingArtifactException {
+        ClassLoader loader = getClassLoader(t.getArtifactId(), new ModuleInfo(), jars);
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(mainJar)
+                .addClassLoader(loader)
+                .addScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
+        Set<Class<?>> typesAnnotatedWith = reflections.getTypesAnnotatedWith(Module.class);
+        LOG.debug("annotated with module {}", typesAnnotatedWith);
+        Optional<Class<?>> potentialModuleClass = typesAnnotatedWith.stream().findFirst();
+
+        if (potentialModuleClass.isPresent()) {
+            LOG.info("found module annotated class {}", potentialModuleClass);
+            Class<? extends AshesModule> moduleClass = (Class<? extends AshesModule>) potentialModuleClass.get();
+            Module annotation = moduleClass.getAnnotation(Module.class);
+            return new ModuleInfo(annotation, moduleClass);
+        } else {
+            // need to use module.inf to find module class name
+            LOG.info("no module annotation found, using module.inf to lookup module class");
+            Enumeration<URL> resourceAsStream = loader.getResources("module.inf");
+            Optional<URL> foundUrl = Collections.list(resourceAsStream).stream().filter(u -> u.toString().contains(t.artifactId)).findFirst();
+
+            if (foundUrl.isPresent()) {
+                try (InputStream openStream = foundUrl.get().openStream()) {
+                    Properties p = new Properties();
+                    p.load(openStream);
+                    return new ModuleInfo(p);
+                }
+            } else {
+                throw new ErrorLoadingArtifactException("no module.inf file or no class annotated with {} is found for maven coords {}", Module.class, t);
+            }
+        }
+
+    }
+
 }
