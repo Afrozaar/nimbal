@@ -1,6 +1,12 @@
 package com.afrozaar.nimbal.core;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
+import com.afrozaar.nimbal.annotations.Module;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
+
+import org.springframework.context.annotation.Configuration;
 
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -12,6 +18,18 @@ import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ConfigurationBuilder;
+
+import java.util.function.BiFunction;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Optional;
+import java.util.Set;
 
 public class ContextLoader {
 
@@ -61,17 +79,16 @@ public class ContextLoader {
 
     }
 
-/*    public void doYourThing(DependencyNode node) {
+    public void doYourThing(DependencyNode node) throws ClassNotFoundException, IOException, ErrorLoadingArtifactException {
         LOG.debug("searching for annotated module");
         URL url = new URL("file", null, node.getArtifact().getFile().getAbsolutePath());
         LOG.debug("adding url {}", url);
 
-        URL[] jars = getJars(node);
-        ModuleInfo module = getModuleAnnotation(mavenCoords, url, jars);
+        URL[] jars = Commons.getJars(node);
+        ModuleInfo module = getModuleAnnotation(node.getArtifact().getArtifactId(), url, jars);
     }
-*/
 
-/*    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
+    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
             ErrorLoadingArtifactException {
         ClassLoader loader = classLoaderFactory.getClassLoader(artifactId, new ModuleInfo(), jars);
 
@@ -79,32 +96,37 @@ public class ContextLoader {
                 .setUrls(mainJar)
                 .addClassLoader(loader)
                 .addScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
-        Set<Class<?>> typesAnnotatedWith = reflections.getTypesAnnotatedWith(Module.class);
+
+        // can't use anything more fancy here as I need the strong typing to ensure the correct new ModuleInfo method is called.
+        {
+            Optional<ModuleInfo> moduleInfo = getModuleInfo(reflections, Module.class, (annotation, clazz) -> new ModuleInfo(annotation, clazz));
+            if (moduleInfo.isPresent()) {
+                return moduleInfo.get();
+            }
+        }
+        {
+            Optional<ModuleInfo> moduleInfo = getModuleInfo(reflections, Configuration.class, (annotation, clazz) -> new ModuleInfo(annotation, clazz));
+            if (moduleInfo.isPresent()) {
+                return moduleInfo.get();
+            }
+        }
+        throw new ErrorLoadingArtifactException("no class annotated with Configuration or Module was found, cannot load this as a module");
+
+    }
+
+    private <T extends Annotation> Optional<ModuleInfo> getModuleInfo(Reflections reflections, Class<T> annotationClazz,
+            BiFunction<T, Class<?>, ModuleInfo> moduleInfoProvider) {
+        Set<Class<?>> typesAnnotatedWith = reflections.getTypesAnnotatedWith(annotationClazz);
         LOG.debug("annotated with module {}", typesAnnotatedWith);
         Optional<Class<?>> potentialModuleClass = typesAnnotatedWith.stream().findFirst();
 
         if (potentialModuleClass.isPresent()) {
-            LOG.info("found module annotated class {}", potentialModuleClass);
-            Class<? extends AshesModule> moduleClass = (Class<? extends AshesModule>) potentialModuleClass.get();
-            Module annotation = moduleClass.getAnnotation(Module.class);
-            return new ModuleInfo(annotation, moduleClass);
+            LOG.info("found configuration annotated class {}", potentialModuleClass);
+            T annotation = potentialModuleClass.get().getAnnotation(annotationClazz);
+            return of(moduleInfoProvider.apply(annotation, potentialModuleClass.get()));
         } else {
-            // need to use module.inf to find module class name
-            LOG.info("no module annotation found, using module.inf to lookup module class");
-            Enumeration<URL> resourceAsStream = loader.getResources("module.inf");
-            Optional<URL> foundUrl = Collections.list(resourceAsStream).stream().filter(u -> u.toString().contains(artifactId)).findFirst();
-
-            if (foundUrl.isPresent()) {
-                try (InputStream openStream = foundUrl.get().openStream()) {
-                    Properties p = new Properties();
-                    p.load(openStream);
-                    return new ModuleInfo(p);
-                }
-            } else {
-                throw new ErrorLoadingArtifactException("no module.inf file or no class annotated with {} is found for maven coords {}", Module.class, t);
-            }
+            return empty();
         }
-
-    }*/
+    }
 
 }

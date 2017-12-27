@@ -2,6 +2,8 @@ package com.afrozaar.nimbal.core;
 
 import com.afrozaar.nimbal.annotations.Module;
 
+import org.springframework.context.annotation.Configuration;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -30,6 +32,14 @@ public class ModuleInfo {
         }
         this.ringFencedFilters = Arrays.asList(module.ringFenceClassBlackListRegex());
         this.moduleClass = moduleClass.getName();
+    }
+
+    public ModuleInfo(Configuration annotation, Class<?> clazz) {
+        this.name = StringUtils.stripToNull(annotation.value());
+        if (this.name == null) {
+            this.name = clazz.getSimpleName();
+        }
+        this.moduleClass = clazz.getName();
     }
 
     public Integer order() {
@@ -61,6 +71,10 @@ public class ModuleInfo {
 
     public String parentModuleClassesOnly() {
         return parentModuleClassesOnly;
+    }
+
+    public boolean isReloadRequired() {
+        return parentModule != null || parentModuleClassesOnly != null || ringFencedFilters != null;
     }
 
 }
