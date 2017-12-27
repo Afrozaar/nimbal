@@ -15,7 +15,11 @@ public class ClassLoaderFactory {
 
     private IRegistry registry;
 
-    ClassLoader getClassLoader(String artifactId, ModuleInfo moduleInfo, URL[] urls) throws ErrorLoadingArtifactException {
+    public ClassLoaderFactory(IRegistry registry) {
+        this.registry = registry;
+    }
+
+    public ClassLoader getClassLoader(String artifactId, ModuleInfo moduleInfo, URL[] urls) throws ErrorLoadingArtifactException {
         String parentName = moduleInfo.parentModule();
         if (parentName == null) {
             parentName = StringUtils.stripToNull(moduleInfo.parentModuleClassesOnly());
@@ -25,11 +29,11 @@ public class ClassLoaderFactory {
             throw new ErrorLoadingArtifactException("no parent class loader found for parent {}", parentName);
         }
         LOG.debug("creating class loader for {}, artifactId:{} with parent ='{}' ringFenceBlackList:{} and jar list {}", moduleInfo.name(), artifactId,
-                moduleInfo.parentModule(), Arrays.asList(moduleInfo.ringFenceFilters()), Arrays.asList(urls));
+                moduleInfo.parentModule(), moduleInfo.ringFenceFilters(), Arrays.asList(urls));
 
         URLClassLoaderExtension classLoader = new URLClassLoaderExtension(urls, parentName != null ? registry.getClassLoader(parentName)
                 : this.getClass().getClassLoader(), artifactId);
-        classLoader.setRingFencedFilters(Arrays.asList(moduleInfo.ringFenceFilters()));
+        classLoader.setRingFencedFilters(moduleInfo.ringFenceFilters());
 
         return classLoader;
     }

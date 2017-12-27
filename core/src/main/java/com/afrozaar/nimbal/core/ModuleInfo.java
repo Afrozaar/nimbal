@@ -5,17 +5,20 @@ import com.afrozaar.nimbal.annotations.Module;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ModuleInfo {
     private Integer order;
     private String name;
     private String parentModule;
     private String parentModuleClassesOnly;
-    private String[] ringFencedFilters;
+    private List<String> ringFencedFilters;
     private String moduleClass;
 
     public ModuleInfo() {
         super();
+        this.ringFencedFilters = Collections.emptyList();
     }
 
     public ModuleInfo(Module module, Class<?> moduleClass) {
@@ -25,7 +28,7 @@ public class ModuleInfo {
         if (parentModule == null) {
             this.parentModuleClassesOnly = StringUtils.stripToNull(module.parentModuleClassesOnly());
         }
-        this.ringFencedFilters = module.ringFenceClassBlackListRegex();
+        this.ringFencedFilters = Arrays.asList(module.ringFenceClassBlackListRegex());
         this.moduleClass = moduleClass.getName();
     }
 
@@ -41,7 +44,7 @@ public class ModuleInfo {
         return parentModule;
     }
 
-    public String[] ringFenceFilters() {
+    public List<String> ringFenceFilters() {
         return ringFencedFilters;
     }
 
@@ -51,8 +54,8 @@ public class ModuleInfo {
 
     @Override
     public String toString() {
-        return "ModuleInfo [name=" + name + ", parentModule=" + parentModule + ", order=" + order + ", ringFencedFilters=" + Arrays.toString(
-                ringFencedFilters)
+        return "ModuleInfo [name=" + name + ", parentModule=" + parentModule + ", order=" + order + ", ringFencedFilters=" +
+                ringFencedFilters
                 + ", moduleClass=" + moduleClass + "]";
     }
 

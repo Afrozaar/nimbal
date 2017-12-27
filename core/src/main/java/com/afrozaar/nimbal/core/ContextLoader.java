@@ -1,6 +1,5 @@
 package com.afrozaar.nimbal.core;
 
-import com.afrozaar.nimbal.annotations.Module;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
 import org.eclipse.aether.RepositorySystem;
@@ -13,18 +12,6 @@ import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.graph.visitor.PreorderNodeListGenerator;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
 
 public class ContextLoader {
 
@@ -74,7 +61,7 @@ public class ContextLoader {
 
     }
 
-    public void doYourThing(DependencyNode node) {
+/*    public void doYourThing(DependencyNode node) {
         LOG.debug("searching for annotated module");
         URL url = new URL("file", null, node.getArtifact().getFile().getAbsolutePath());
         LOG.debug("adding url {}", url);
@@ -82,22 +69,9 @@ public class ContextLoader {
         URL[] jars = getJars(node);
         ModuleInfo module = getModuleAnnotation(mavenCoords, url, jars);
     }
+*/
 
-    public URL[] getJars(DependencyNode node) {
-        PreorderNodeListGenerator nlg = new PreorderNodeListGenerator();
-        node.accept(nlg);
-        URL[] urls = nlg.getFiles().stream().map(file -> {
-            try {
-                return new URL("file", null, file.getAbsolutePath());
-            } catch (MalformedURLException e) {
-                LOG.info("error creating url file {}", file, e);
-                return null;
-            }
-        }).filter(Objects::nonNull).toArray(URL[]::new);
-        return urls;
-    }
-
-    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
+/*    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
             ErrorLoadingArtifactException {
         ClassLoader loader = classLoaderFactory.getClassLoader(artifactId, new ModuleInfo(), jars);
 
@@ -131,6 +105,6 @@ public class ContextLoader {
             }
         }
 
-    }
+    }*/
 
 }
