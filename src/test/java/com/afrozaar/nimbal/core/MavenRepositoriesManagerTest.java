@@ -1,4 +1,4 @@
-package com.afrozaar.nimbal;
+package com.afrozaar.nimbal.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +27,8 @@ public class MavenRepositoriesManagerTest {
         MavenRepositoriesManager manager = new MavenRepositoriesManager("http://repo1.maven.org/maven2", snapshotUrl, null, null);
 
         manager.init();
-        RemoteRepository snapshotRepository = manager.getSnapshotRepository();
+        RemoteRepository snapshotRepository = manager.getSnapshotRepository().orElse(null);
+        assertThat(snapshotRepository).isNotNull();
         assertThat(snapshotRepository.getPolicy(true).isEnabled()).isTrue();
 
         assertThat(snapshotRepository.getUrl()).isEqualTo(snapshotUrl);

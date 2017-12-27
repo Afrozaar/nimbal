@@ -1,6 +1,6 @@
 package com.afrozaar.nimbal.core;
 
-import com.afrozaar.nimbal.legacy.ModuleManager.MavenCoords;
+import static java.util.Optional.ofNullable;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -24,12 +24,15 @@ import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 public class MavenRepositoriesManager {
+
+    private String m2Folder = ".m2";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MavenRepositoriesManager.class);
 
@@ -128,7 +131,7 @@ public class MavenRepositoriesManager {
 
     }
 
-    private RepositorySystemSession newSession(MavenCoords mavenCoords) {
+    RepositorySystemSession newSession(MavenCoords mavenCoords) {
         if (mavenCoords.isSnapshot()) {
             // then we check if the version is in the loaded snapshots - if it we need to create a new session, otherwise we can reuse thes napshot session
             if (snapshotVersionsLoaded.contains(mavenCoords)) {
@@ -149,7 +152,7 @@ public class MavenRepositoriesManager {
 
     private RepositorySystemSession getSession(RepositorySystem system) {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-        String[] parts = { repositoryBase, ".m2", "repository" };
+        String[] parts = { repositoryBase, m2Folder, "repository" };
         final String repository = Arrays.stream(parts).collect(Collectors.joining(File.separator));
         LOG.info("Adding Local Maven Repo with path {}", repository);
         LocalRepository localRepo = new LocalRepository(repository);
@@ -161,8 +164,20 @@ public class MavenRepositoriesManager {
         return releaseRepository;
     }
 
-    public RemoteRepository getSnapshotRepository() {
-        return snapshotRepository;
+    public Optional<RemoteRepository> getSnapshotRepository() {
+        return ofNullable(snapshotRepository);
+    }
+
+    public RepositorySystem getRepoSystem() {
+        return repoSystem;
+    }
+
+    public void setRepositoryBase(String repositoryBase) {
+        this.repositoryBase = repositoryBase;
+    }
+
+    public void setM2Folder(String m2Folder) {
+        this.m2Folder = m2Folder;
     }
 
 }
