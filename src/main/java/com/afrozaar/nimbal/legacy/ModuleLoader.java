@@ -1,4 +1,6 @@
-package com.afrozaar.nimbal.core;
+package com.afrozaar.nimbal.legacy;
+
+import com.afrozaar.nimbal.core.ErrorLoadingArtifactException;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;

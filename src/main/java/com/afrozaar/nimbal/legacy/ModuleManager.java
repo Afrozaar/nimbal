@@ -1,7 +1,9 @@
-package com.afrozaar.nimbal.core;
+package com.afrozaar.nimbal.legacy;
 
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+
+import com.afrozaar.nimbal.core.ErrorLoadingArtifactException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
