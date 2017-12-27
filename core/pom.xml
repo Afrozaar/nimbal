@@ -21,6 +21,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.afrozaar.nimbal</groupId>
+            <artifactId>nimbal-annotations</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
