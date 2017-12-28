@@ -14,7 +14,7 @@ public class ContextFactory implements ApplicationContextAware {
     private ClassLoaderFactory classLoaderFactory;
     private IRegistry registry;
     private ParentContext defaultParentContext;
-    private ClassLoader defaultClassLoader = this.getClass().getClassLoader();
+    private ClassLoader defaultClassLoader;
 
     public static class ParentContext {
 
@@ -39,6 +39,7 @@ public class ContextFactory implements ApplicationContextAware {
     public ContextFactory(ClassLoaderFactory classLoaderFactory, IRegistry registry) {
         this.classLoaderFactory = classLoaderFactory;
         this.registry = registry;
+        this.defaultClassLoader = classLoaderFactory.getDefaultClassLoader();
     }
 
     ParentContext getParentContext(ModuleInfo module) throws ErrorLoadingArtifactException {
@@ -65,18 +66,6 @@ public class ContextFactory implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.defaultParentContext = new ParentContext(defaultClassLoader, applicationContext);
-    }
-
-    /**
-     * this method might be called after the setAppicationcontext or before. AWe must cope with both scenarios.
-     * 
-     * @param defaultClassLoader
-     */
-    public void setDefaultClassLoader(ClassLoader defaultClassLoader) {
-        this.defaultClassLoader = defaultClassLoader;
-        if (defaultParentContext != null) { // set application context has already happened
-            this.defaultParentContext = new ParentContext(defaultClassLoader, defaultParentContext.getApplicationContext());
-        }
     }
 
     public ConfigurableApplicationContext createContext(ClassLoader classLoader, String moduleClass, String moduleName, ApplicationContext parent)

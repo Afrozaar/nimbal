@@ -4,8 +4,11 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import com.afrozaar.nimbal.annotations.Module;
+import com.afrozaar.nimbal.core.ContextFactory.ParentContext;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import org.eclipse.aether.RepositorySystem;
@@ -24,10 +27,13 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,11 +43,16 @@ public class ContextLoader {
 
     private MavenRepositoriesManager repositoriesManager;
     private ClassLoaderFactory classLoaderFactory;
+    private IRegistry registry;
+    private ContextFactory contextFactory;
 
-    public ContextLoader(MavenRepositoriesManager repositoriesManager, ClassLoaderFactory classLoaderFactory) {
+    public ContextLoader(MavenRepositoriesManager repositoriesManager, ClassLoaderFactory classLoaderFactory, IRegistry registry,
+            ContextFactory contextFactory) {
         super();
         this.repositoriesManager = repositoriesManager;
         this.classLoaderFactory = classLoaderFactory;
+        this.registry = registry;
+        this.contextFactory = contextFactory;
     }
 
     public DependencyNode refreshDependencies(MavenCoords mavenCoords) throws ErrorLoadingArtifactException {
@@ -147,6 +158,38 @@ public class ContextLoader {
         } else {
             return empty();
         }
+    }
+
+    public ApplicationContext loadContext(MavenCoords mavenCoords, Consumer<ConfigurableApplicationContext>... preRefresh) throws ErrorLoadingArtifactException,
+            MalformedURLException, IOException,
+            ClassNotFoundException {
+
+        DependencyNode node = refreshDependencies(mavenCoords);
+
+        URL[] jars = Commons.getJars(node);
+
+        ModuleInfoAndClassLoader moduleInfoAndClassLoader = getModuleAnnotation(node.getArtifact().getArtifactId(), new URL("file", null, node
+                .getArtifact().getFile()
+                .getAbsolutePath()), jars);
+
+        // if we discover meta data on the module that is only available in the construct of a class loader (parent class loader for example) we need to recreate the class
+        // loader with this info
+        ClassLoader classLoader = moduleInfoAndClassLoader.getModuleInfo().isReloadRequired() ? classLoaderFactory.getClassLoader(moduleInfoAndClassLoader
+                .getModuleInfo(), jars)
+                : moduleInfoAndClassLoader.getClassLoader();
+
+        ModuleInfo moduleInfo = moduleInfoAndClassLoader.getModuleInfo();
+
+        ParentContext parentContext = contextFactory.getParentContext(moduleInfo);
+
+        ConfigurableApplicationContext context = contextFactory.createContext(classLoader, moduleInfo.moduleClass(), moduleInfo.name(), parentContext
+                .getApplicationContext());
+
+        if (preRefresh != null) {
+            Arrays.stream(preRefresh).forEach(c -> c.accept(context));
+        }
+
+        return contextFactory.refreshContext(classLoader, context);
     }
 
 }

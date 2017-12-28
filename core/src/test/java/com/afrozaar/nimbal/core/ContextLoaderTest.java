@@ -31,6 +31,7 @@ import java.util.stream.StreamSupport;
 
 public class ContextLoaderTest {
 
+    @SuppressWarnings("unused")
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextLoaderTest.class);
 
     private Path path;
@@ -56,7 +57,7 @@ public class ContextLoaderTest {
         manager.setM2Folder("m2");
         manager.init();
 
-        ContextLoader loader = new ContextLoader(manager, null);
+        ContextLoader loader = new ContextLoader(manager, null, null, null);
 
         loader.refreshDependencies(new MavenCoords("com.google.guava", "guava", "23.5-jre"));
 
@@ -79,8 +80,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple", "1.0.0-SNAPSHOT"));
 
@@ -102,8 +104,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple-with-label", "1.0.0-SNAPSHOT"));
 
@@ -124,8 +127,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.0.0-SNAPSHOT"));
 
@@ -154,8 +158,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple", "1.0.0-SNAPSHOT"));
 
@@ -175,8 +180,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple-with-label", "1.0.0-SNAPSHOT"));
 
@@ -186,6 +192,7 @@ public class ContextLoaderTest {
                 .getAbsolutePath()), jars);
 
         Class<?> loadClass = moduleInfo.getClassLoader().loadClass("com.afrozaar.nimbal.test.SpringManagedObject");
+        @SuppressWarnings("unchecked")
         Supplier<String> newInstance = (Supplier<String>) loadClass.newInstance();
         assertThat(newInstance.get()).isEqualTo("nimal test with label");
     }
@@ -195,8 +202,9 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation-with-label",
                 "1.0.0-SNAPSHOT"));
@@ -218,10 +226,11 @@ public class ContextLoaderTest {
 
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
 
-        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, factory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory factory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, factory, registry, null);
 
-        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation",
+        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation-for-test",
                 "1.0.0-SNAPSHOT"));
 
         URL[] jars = Commons.getJars(node);

@@ -24,8 +24,9 @@ public class ClassLoaderFactoryTest {
         manager.setM2Folder(".m2");
         manager.init();
 
-        ClassLoaderFactory classLoaderFactory = new ClassLoaderFactory(mock(IRegistry.class));
-        ContextLoader loader = new ContextLoader(manager, classLoaderFactory);
+        IRegistry registry = mock(IRegistry.class);
+        ClassLoaderFactory classLoaderFactory = new ClassLoaderFactory(registry);
+        ContextLoader loader = new ContextLoader(manager, classLoaderFactory, registry, null);
 
         DependencyNode node = loader.refreshDependencies(new MavenCoords("com.nrinaudo", "kantan.xpath-nekohtml_2.12", "0.3.1"));
 

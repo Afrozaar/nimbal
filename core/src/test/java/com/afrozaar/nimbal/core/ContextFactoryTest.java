@@ -12,7 +12,6 @@ import org.springframework.context.ApplicationContext;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -21,14 +20,9 @@ public class ContextFactoryTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextFactoryTest.class);
 
-    @InjectMocks
-    private ContextFactory contextFactory;
-
-    @InjectMocks
-    private ClassLoaderFactory classLoaderFactory;
-
-    @Mock
-    private IRegistry registry;
+    private IRegistry registry = mock(IRegistry.class);
+    private ClassLoaderFactory classLoaderFactory = new ClassLoaderFactory(registry);
+    private ContextFactory contextFactory = new ContextFactory(classLoaderFactory, registry);
 
     @Mock
     private ApplicationContext applicationContext;
@@ -98,7 +92,5 @@ public class ContextFactoryTest {
         assertThat(parentContext.getApplicationContext()).isSameAs(applicationContext);
         assertThat(parentContext.getClassLoader()).isSameAs(mockClassLoader);
     }
-    
-    
 
 }

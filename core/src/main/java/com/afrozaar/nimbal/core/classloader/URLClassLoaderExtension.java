@@ -18,7 +18,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class URLClassLoaderExtension extends URLClassLoader implements SmartClassLoader {
 
-    private final String artifactId;
+    private final String name;
 
     Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -27,9 +27,9 @@ public class URLClassLoaderExtension extends URLClassLoader implements SmartClas
     private static int count;
     int id = count++;
 
-    public URLClassLoaderExtension(URL[] urls, ClassLoader parent, String artifactId) {
+    public URLClassLoaderExtension(URL[] urls, ClassLoader parent, String name) {
         super(urls, parent);
-        this.artifactId = artifactId;
+        this.name = name;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class URLClassLoaderExtension extends URLClassLoader implements SmartClas
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        LOG.trace("in load class {} {}, {}", artifactId, this, name, resolve);
+        LOG.trace("in load class {} {}, {}", name, this, name, resolve);
 
         boolean loadClassLocally = isLoadClassLocally(name, ringFencedFilters);
 
@@ -90,7 +90,7 @@ public class URLClassLoaderExtension extends URLClassLoader implements SmartClas
 
     @Override
     public String toString() {
-        return "[ URL Class Loader - " + artifactId + " " + id + " ]";
+        return "[ URL Class Loader - " + name + " " + id + " ]";
     }
 
     @Override
@@ -105,5 +105,9 @@ public class URLClassLoaderExtension extends URLClassLoader implements SmartClas
 
     public void setRingFencedFilters(List<String> ringFencedFilters) {
         this.ringFencedFilters = ringFencedFilters;
+    }
+
+    public String getName() {
+        return name;
     }
 }

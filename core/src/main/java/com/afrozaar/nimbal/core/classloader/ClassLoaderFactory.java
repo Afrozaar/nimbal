@@ -36,11 +36,19 @@ public class ClassLoaderFactory {
     }
 
     private ClassLoader getParentClassLoader(String parentName) throws ErrorLoadingArtifactException {
-        ClassLoader parentClassLoader = registry.getClassLoader(parentName);
-        if (parentName != null && parentClassLoader == null) {
-            throw new ErrorLoadingArtifactException("no parent class loader found for parent {}", parentName);
+        if (parentName != null) {
+            ClassLoader parentClassLoader = registry.getClassLoader(parentName);
+            if (parentClassLoader == null) {
+                throw new ErrorLoadingArtifactException("no parent class loader found for parent {}", parentName);
+            }
+            return parentClassLoader;
+        } else {
+            return defaultParentClassLoader;
         }
-        return parentName != null ? parentClassLoader : defaultParentClassLoader;
+    }
+
+    public ClassLoader getDefaultClassLoader() {
+        return defaultParentClassLoader;
     }
 
 }
