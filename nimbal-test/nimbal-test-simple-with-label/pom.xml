@@ -7,7 +7,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <groupId>com.afrozaar.nimbal.test</groupId>
-    <artifactId>nimbal-test-simple</artifactId>
+    <artifactId>nimbal-test-simple-with-label</artifactId>
 
     <dependencies>
         <dependency>

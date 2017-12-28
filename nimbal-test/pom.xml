@@ -10,5 +10,6 @@
   <name>Test Pom</name>
   <modules>
       <module>nimbal-test-simple</module>
+      <module>nimbal-test-simple-with-label</module>
   </modules>
 </project>

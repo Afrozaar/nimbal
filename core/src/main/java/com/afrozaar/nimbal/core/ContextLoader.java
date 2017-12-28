@@ -85,10 +85,38 @@ public class ContextLoader {
         LOG.debug("adding url {}", url);
 
         URL[] jars = Commons.getJars(node);
-        ModuleInfo module = getModuleAnnotation(node.getArtifact().getArtifactId(), url, jars);
+        ModuleInfoAndClassLoader module = getModuleAnnotation(node.getArtifact().getArtifactId(), url, jars);
     }
 
-    public ModuleInfo getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException, ClassNotFoundException,
+    public static class ModuleInfoAndClassLoader {
+        private ClassLoader classLoader;
+        private ModuleInfo moduleInfo;
+
+        public ModuleInfoAndClassLoader(ClassLoader classLoader, ModuleInfo moduleInfo) {
+            super();
+            this.classLoader = classLoader;
+            this.moduleInfo = moduleInfo;
+        }
+
+        public ClassLoader getClassLoader() {
+            return classLoader;
+        }
+
+        public void setClassLoader(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+        }
+
+        public ModuleInfo getModuleInfo() {
+            return moduleInfo;
+        }
+
+        public void setModuleInfo(ModuleInfo moduleInfo) {
+            this.moduleInfo = moduleInfo;
+        }
+
+    }
+
+    public ModuleInfoAndClassLoader getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException,
             ErrorLoadingArtifactException {
         ClassLoader loader = classLoaderFactory.getClassLoader(artifactId, new ModuleInfo(), jars);
 
@@ -98,16 +126,17 @@ public class ContextLoader {
                 .addScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
 
         // can't use anything more fancy here as I need the strong typing to ensure the correct new ModuleInfo method is called.
+        // thus what looks like it could be not repeated needs to be
         {
             Optional<ModuleInfo> moduleInfo = getModuleInfo(reflections, Module.class, (annotation, clazz) -> new ModuleInfo(annotation, clazz));
             if (moduleInfo.isPresent()) {
-                return moduleInfo.get();
+                return new ModuleInfoAndClassLoader(loader, moduleInfo.get());
             }
         }
         {
             Optional<ModuleInfo> moduleInfo = getModuleInfo(reflections, Configuration.class, (annotation, clazz) -> new ModuleInfo(annotation, clazz));
             if (moduleInfo.isPresent()) {
-                return moduleInfo.get();
+                return new ModuleInfoAndClassLoader(loader, moduleInfo.get());
             }
         }
         throw new ErrorLoadingArtifactException("no class annotated with Configuration or Module was found, cannot load this as a module");

@@ -18,7 +18,7 @@ public class MavenRepositoriesManagerTest {
         RemoteRepository releaseRepository = manager.getReleaseRepository();
         assertThat(releaseRepository.getPolicy(true).isEnabled()).isFalse();
         assertThat(releaseRepository.getUrl()).isEqualTo("http://repo1.maven.org/maven2");
-        assertThat(manager.getSnapshotRepository()).isNull();
+        assertThat(manager.getSnapshotRepository()).isEmpty();
     }
 
     @Test
