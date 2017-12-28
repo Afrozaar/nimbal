@@ -114,7 +114,7 @@ public class ContextLoaderTest {
                 .getAbsolutePath()), jars);
 
         ModuleInfo moduleInfo = moduleInfoAndClassLoader.getModuleInfo();
-        assertThat(moduleInfo.name()).isEqualTo("DefaultConig");
+        assertThat(moduleInfo.name()).isEqualTo("ParentConfig");
         assertThat(moduleInfo.moduleClass()).isEqualTo("com.afrozaar.nimbal.test.DefaultConfiguration");
         assertThat(moduleInfo.isReloadRequired()).isFalse();
     }

@@ -70,6 +70,7 @@ public class OrchestrationTest {
         assertThat(bean).isNotNull();
         String x = ((Supplier<String>) bean).get();
         assertThat(x).isEqualTo("from test simple");
+        assertThat(bean.getClass().getName()).isEqualTo("com.afrozaar.nimbal.test.SpringManagedObject");
 
     }
 
