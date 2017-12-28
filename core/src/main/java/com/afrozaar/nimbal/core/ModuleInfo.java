@@ -15,12 +15,11 @@ public class ModuleInfo {
     private String name;
     private String parentModule;
     private String parentModuleClassesOnly;
-    private List<String> ringFencedFilters;
+    private List<String> ringFencedFilters = Collections.emptyList();
     private String moduleClass;
 
     public ModuleInfo() {
         super();
-        this.ringFencedFilters = Collections.emptyList();
     }
 
     public ModuleInfo(Module module, Class<?> moduleClass) {
@@ -74,7 +73,7 @@ public class ModuleInfo {
     }
 
     public boolean isReloadRequired() {
-        return parentModule != null || parentModuleClassesOnly != null || ringFencedFilters != null;
+        return parentModule != null || parentModuleClassesOnly != null || !ringFencedFilters.isEmpty();
     }
 
 }

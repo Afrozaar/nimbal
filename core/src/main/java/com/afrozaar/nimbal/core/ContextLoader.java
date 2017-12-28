@@ -79,15 +79,6 @@ public class ContextLoader {
 
     }
 
-    public void doYourThing(DependencyNode node) throws ClassNotFoundException, IOException, ErrorLoadingArtifactException {
-        LOG.debug("searching for annotated module");
-        URL url = new URL("file", null, node.getArtifact().getFile().getAbsolutePath());
-        LOG.debug("adding url {}", url);
-
-        URL[] jars = Commons.getJars(node);
-        ModuleInfoAndClassLoader module = getModuleAnnotation(node.getArtifact().getArtifactId(), url, jars);
-    }
-
     public static class ModuleInfoAndClassLoader {
         private ClassLoader classLoader;
         private ModuleInfo moduleInfo;

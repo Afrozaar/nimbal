@@ -11,5 +11,6 @@
   <modules>
       <module>nimbal-test-simple</module>
       <module>nimbal-test-simple-with-label</module>
+      <module>nimbal-test-module-annotation</module>
   </modules>
 </project>

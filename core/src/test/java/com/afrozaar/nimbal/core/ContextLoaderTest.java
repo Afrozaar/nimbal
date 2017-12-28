@@ -117,6 +117,28 @@ public class ContextLoaderTest {
         assertThat(moduleInfo.isReloadRequired()).isFalse();
     }
 
+    @Test
+    public void LoadContextWithModuleAnnotation() throws ErrorLoadingArtifactException, MalformedURLException, IOException {
+
+        MavenRepositoriesManager manager = setupDefaultMavenRepo();
+
+        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
+        ContextLoader loader = new ContextLoader(manager, factory);
+
+        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.0.0-SNAPSHOT"));
+
+        URL[] jars = Commons.getJars(node);
+
+        ModuleInfoAndClassLoader moduleInfoAndClassLoader = loader.getModuleAnnotation(node.getArtifact().getArtifactId(), new URL("file", null, node
+                .getArtifact().getFile()
+                .getAbsolutePath()), jars);
+
+        ModuleInfo moduleInfo = moduleInfoAndClassLoader.getModuleInfo();
+        assertThat(moduleInfo.name()).isEqualTo("DefaultConfiguration");
+        assertThat(moduleInfo.moduleClass()).isEqualTo("com.afrozaar.nimbal.test.DefaultConfiguration");
+        assertThat(moduleInfo.isReloadRequired()).isFalse();
+    }
+
     private MavenRepositoriesManager setupDefaultMavenRepo() {
         MavenRepositoriesManager manager = new MavenRepositoriesManager("http://repo1.maven.org/maven2");
         manager.setM2Folder(".m2");
@@ -124,7 +146,6 @@ public class ContextLoaderTest {
         return manager;
     }
 
-    
     @Test
     public void ClassLoaderModuleSimple() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException,
             InstantiationException, IllegalAccessException {
@@ -145,7 +166,7 @@ public class ContextLoaderTest {
         Supplier<String> newInstance = (Supplier<String>) loadClass.newInstance();
         assertThat(newInstance.get()).isEqualTo("from test simple");
     }
-    
+
     @Test
     public void ClassLoaderModuleSimpleWithLabel() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException,
             InstantiationException, IllegalAccessException {
@@ -166,6 +187,5 @@ public class ContextLoaderTest {
         Supplier<String> newInstance = (Supplier<String>) loadClass.newInstance();
         assertThat(newInstance.get()).isEqualTo("nimal test with label");
     }
-
 
 }

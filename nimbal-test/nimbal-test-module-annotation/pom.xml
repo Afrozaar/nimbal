@@ -3,15 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.afrozaar.nimbal</groupId>
-        <artifactId>nimbal-pom</artifactId>
+        <artifactId>nimbal-test</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>nimbal-annotations</artifactId>
+    <groupId>com.afrozaar.nimbal.test</groupId>
+    <artifactId>nimbal-test-module-annotation</artifactId>
+
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>4.3.13.RELEASE</version>
+            <groupId>com.afrozaar.nimbal</groupId>
+            <artifactId>nimbal-annotations</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
