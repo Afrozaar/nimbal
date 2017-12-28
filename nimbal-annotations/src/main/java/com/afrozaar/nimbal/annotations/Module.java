@@ -16,6 +16,7 @@ public @interface Module {
 
     String name() default "";
 
+    String value() default "";
     /**
      * The module this module depends on (will bcome the parent module, both
      * classloader and bean factory will be included in the chain).

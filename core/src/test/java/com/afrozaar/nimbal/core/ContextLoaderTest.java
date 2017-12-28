@@ -14,6 +14,7 @@ import com.google.common.io.RecursiveDeleteOption;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.function.Supplier;
@@ -46,6 +47,7 @@ public class ContextLoaderTest {
 
     }
 
+    @Ignore
     @Test
     public void CheckDependenciesGetLoaded() throws ErrorLoadingArtifactException, IOException {
 
@@ -186,6 +188,28 @@ public class ContextLoaderTest {
         Class<?> loadClass = moduleInfo.getClassLoader().loadClass("com.afrozaar.nimbal.test.SpringManagedObject");
         Supplier<String> newInstance = (Supplier<String>) loadClass.newInstance();
         assertThat(newInstance.get()).isEqualTo("nimal test with label");
+    }
+    
+    @Test
+    public void LoadContextWithModuleAnnotationAndLabel() throws ErrorLoadingArtifactException, MalformedURLException, IOException {
+
+        MavenRepositoriesManager manager = setupDefaultMavenRepo();
+
+        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
+        ContextLoader loader = new ContextLoader(manager, factory);
+
+        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation-with-label", "1.0.0-SNAPSHOT"));
+
+        URL[] jars = Commons.getJars(node);
+
+        ModuleInfoAndClassLoader moduleInfoAndClassLoader = loader.getModuleAnnotation(node.getArtifact().getArtifactId(), new URL("file", null, node
+                .getArtifact().getFile()
+                .getAbsolutePath()), jars);
+
+        ModuleInfo moduleInfo = moduleInfoAndClassLoader.getModuleInfo();
+        assertThat(moduleInfo.name()).isEqualTo("ModuleInfoWithName");
+        assertThat(moduleInfo.moduleClass()).isEqualTo("com.afrozaar.nimbal.test.DefaultConfiguration");
+        assertThat(moduleInfo.isReloadRequired()).isFalse();
     }
 
 }

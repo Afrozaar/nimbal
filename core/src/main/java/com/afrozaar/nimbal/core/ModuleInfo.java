@@ -2,6 +2,8 @@ package com.afrozaar.nimbal.core;
 
 import com.afrozaar.nimbal.annotations.Module;
 
+import com.google.common.collect.Lists;
+
 import org.springframework.context.annotation.Configuration;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +26,10 @@ public class ModuleInfo {
 
     public ModuleInfo(Module module, Class<?> moduleClass) {
         this.order = module.order() == Integer.MIN_VALUE ? null : module.order();
-        this.name = module.name().equals("") ? moduleClass.getSimpleName() : module.name();
+
+        List<String> names = Lists.newArrayList(module.name(), module.value(), moduleClass.getSimpleName());
+
+        this.name = names.stream().filter(StringUtils::isNotBlank).findFirst().get();
         this.parentModule = StringUtils.stripToNull(module.parentModule());
         if (parentModule == null) {
             this.parentModuleClassesOnly = StringUtils.stripToNull(module.parentModuleClassesOnly());
