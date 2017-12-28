@@ -2,6 +2,7 @@ package com.afrozaar.nimbal.core;
 
 import com.afrozaar.nimbal.annotations.Module;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,8 @@ public class ModuleInfo {
     private boolean parentModuleClassesOnly;
     private List<String> ringFencedFilters = Collections.emptyList();
     private String moduleClass;
+
+    private String artifactId;
 
     public ModuleInfo() {
         super();
@@ -42,6 +45,10 @@ public class ModuleInfo {
             this.name = clazz.getSimpleName();
         }
         this.moduleClass = clazz.getName();
+    }
+
+    public ModuleInfo(String name) {
+        this.name = name;
     }
 
     public Integer order() {
@@ -77,6 +84,20 @@ public class ModuleInfo {
 
     public boolean isReloadRequired() {
         return parentModule != null || !ringFencedFilters.isEmpty();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @VisibleForTesting
+    public void setParentModule(String parentModule) {
+        this.parentModule = parentModule;
+
+    }
+
+    public void setParentClassLoaderOnly(boolean parentClassLoaderOnly) {
+        this.parentModuleClassesOnly = parentClassLoaderOnly;
     }
 
 }

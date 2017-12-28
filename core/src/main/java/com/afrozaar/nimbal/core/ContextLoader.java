@@ -109,7 +109,7 @@ public class ContextLoader {
 
     public ModuleInfoAndClassLoader getModuleAnnotation(String artifactId, URL mainJar, URL[] jars) throws IOException,
             ErrorLoadingArtifactException {
-        ClassLoader loader = classLoaderFactory.getClassLoader(artifactId, new ModuleInfo(), jars);
+        ClassLoader loader = classLoaderFactory.getClassLoader(new ModuleInfo(artifactId), jars);
 
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(mainJar)

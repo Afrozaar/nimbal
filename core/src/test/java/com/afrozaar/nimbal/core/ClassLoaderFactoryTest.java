@@ -49,7 +49,9 @@ public class ClassLoaderFactoryTest {
 
         URL[] jars = Commons.getJars(node);
 
-        ClassLoader classLoader = classLoaderFactory.getClassLoader(node.getArtifact().getArtifactId(), new ModuleInfo(), jars);
+        ModuleInfo moduleInfo = new ModuleInfo();
+        moduleInfo.setName(node.getArtifact().getArtifactId());
+        ClassLoader classLoader = classLoaderFactory.getClassLoader(moduleInfo, jars);
 
         Class<?> loadClass = classLoader.loadClass("org.cyberneko.html.HTMLScanner");
 
