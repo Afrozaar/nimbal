@@ -29,8 +29,25 @@ The modules must reside in maven and the parameter that is supplied is the maven
 
 #### How to run the tests:
 
-Since this solution relies heavily on maven we need to first create the test modules. run mvn intall in the nimbal-test pom to install these locally. Once this is done the tests in nimbal-core can be run that will demonstrate the module manager in action.
+The only important thing here is that the reactor project has been configured to ensure the test modules (these are the ones that will be loaded) are built before the core module manager is run. There is no hard dependency on or from these test modules - if there was you would not be able to reload modules as they would be loaded from the default class loader.
 
-I'm not sure whether I'll add these test modules to maven central so that this step is not required. This is probably not required because 
+#### Documentation on Class Reloading 
+
+tl;dr: A class will be unloaded if two conditions are met:
+
+1.  There are no reachable references to objects of that class
+2.  It's classloader is not reachable
+
+Thus it is never possible to unload classse that are loaded by the default class loader. 
+
+I'll post some better links when I get a change to find some. Or I'll write my own entry and classloading in java is hard to understand at first but once you get it, it makes a lot of sense.
+
+* <https://stackoverflow.com/questions/45803545/dynamic-loading-of-spring-bean-from-jar-along-with-dependent-beans/45804785#45804785>
+* <https://zeroturnaround.com/rebellabs/rebel-labs-tutorial-do-you-really-get-classloaders>
+
+
+
+
+
 
 
