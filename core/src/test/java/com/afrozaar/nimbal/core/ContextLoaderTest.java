@@ -14,7 +14,6 @@ import com.google.common.io.RecursiveDeleteOption;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.function.Supplier;
@@ -48,7 +47,6 @@ public class ContextLoaderTest {
 
     }
 
-    @Ignore
     @Test
     public void CheckDependenciesGetLoaded() throws ErrorLoadingArtifactException, IOException {
 

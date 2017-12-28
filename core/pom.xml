@@ -129,48 +129,5 @@
             <artifactId>mockito-core</artifactId>
             <version>2.13.0</version>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-simple</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-module-annotation</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-module-annotation-with-label</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-module-complex-annotation</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-module-complex-annotation-for-test</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.afrozaar.nimbal.test</groupId>
-            <artifactId>nimbal-test-simple-with-label</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-
-
-
-
     </dependencies>
 </project>

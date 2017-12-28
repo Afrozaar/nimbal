@@ -15,9 +15,9 @@
     </properties>
 
     <modules>
+        <module>nimbal-test</module>
         <module>core</module>
         <module>nimbal-annotations</module>
-        <module>nimbal-test</module>
     </modules>
 </project>
 
