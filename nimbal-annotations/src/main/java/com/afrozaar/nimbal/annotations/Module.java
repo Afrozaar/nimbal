@@ -17,9 +17,10 @@ public @interface Module {
     String name() default "";
 
     String value() default "";
+
     /**
      * The module this module depends on (will bcome the parent module, both
-     * classloader and bean factory will be included in the chain).
+     * classloader and will be included in the chain) and bean factory also if parentModuleClaseses only is false
      * <p>
      * If this is specified the parentModuleClassesOnly will be ignored
      * </p>
@@ -27,14 +28,9 @@ public @interface Module {
     String parentModule() default "";
 
     /**
-     * The parent module specified here will only include the class loader as
-     * parent (not the bean factory).
-     * <p>
-     * If the parentModule is specified this value will be ignore
-     * </p>
-     * 
+     * specifies that that parent module should only load classes and not bean context 
      */
-    String parentModuleClassesOnly() default "";
+    boolean parentModuleClassesOnly() default false;
 
     String[] ringFenceClassBlackListRegex() default {};
 }

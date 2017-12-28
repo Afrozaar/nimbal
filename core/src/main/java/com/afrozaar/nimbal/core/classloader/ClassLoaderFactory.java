@@ -4,8 +4,6 @@ import com.afrozaar.nimbal.core.ErrorLoadingArtifactException;
 import com.afrozaar.nimbal.core.IRegistry;
 import com.afrozaar.nimbal.core.ModuleInfo;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.net.URL;
 import java.util.Arrays;
 
@@ -21,9 +19,6 @@ public class ClassLoaderFactory {
 
     public ClassLoader getClassLoader(String artifactId, ModuleInfo moduleInfo, URL[] urls) throws ErrorLoadingArtifactException {
         String parentName = moduleInfo.parentModule();
-        if (parentName == null) {
-            parentName = StringUtils.stripToNull(moduleInfo.parentModuleClassesOnly());
-        }
 
         if (parentName != null && registry.getClassLoader(parentName) == null) {
             throw new ErrorLoadingArtifactException("no parent class loader found for parent {}", parentName);

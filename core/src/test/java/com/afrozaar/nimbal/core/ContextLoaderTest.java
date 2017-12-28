@@ -189,7 +189,7 @@ public class ContextLoaderTest {
         Supplier<String> newInstance = (Supplier<String>) loadClass.newInstance();
         assertThat(newInstance.get()).isEqualTo("nimal test with label");
     }
-    
+
     @Test
     public void LoadContextWithModuleAnnotationAndLabel() throws ErrorLoadingArtifactException, MalformedURLException, IOException {
 
@@ -198,7 +198,8 @@ public class ContextLoaderTest {
         ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
         ContextLoader loader = new ContextLoader(manager, factory);
 
-        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation-with-label", "1.0.0-SNAPSHOT"));
+        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation-with-label",
+                "1.0.0-SNAPSHOT"));
 
         URL[] jars = Commons.getJars(node);
 
@@ -210,6 +211,33 @@ public class ContextLoaderTest {
         assertThat(moduleInfo.name()).isEqualTo("ModuleInfoWithName");
         assertThat(moduleInfo.moduleClass()).isEqualTo("com.afrozaar.nimbal.test.DefaultConfiguration");
         assertThat(moduleInfo.isReloadRequired()).isFalse();
+    }
+
+    @Test
+    public void LoadContextWithModuleComplexAnnotation() throws ErrorLoadingArtifactException, MalformedURLException, IOException {
+
+        MavenRepositoriesManager manager = setupDefaultMavenRepo();
+
+        ClassLoaderFactory factory = new ClassLoaderFactory(mock(IRegistry.class));
+        ContextLoader loader = new ContextLoader(manager, factory);
+
+        DependencyNode node = loader.refreshDependencies(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation",
+                "1.0.0-SNAPSHOT"));
+
+        URL[] jars = Commons.getJars(node);
+
+        ModuleInfoAndClassLoader moduleInfoAndClassLoader = loader.getModuleAnnotation(node.getArtifact().getArtifactId(), new URL("file", null, node
+                .getArtifact().getFile()
+                .getAbsolutePath()), jars);
+
+        ModuleInfo moduleInfo = moduleInfoAndClassLoader.getModuleInfo();
+        assertThat(moduleInfo.name()).isEqualTo("ComplexModule");
+        assertThat(moduleInfo.order()).isEqualTo(51);
+        assertThat(moduleInfo.parentModule()).isEqualTo("bar");
+        assertThat(moduleInfo.parentModuleClassesOnly()).isTrue();
+        assertThat(moduleInfo.ringFenceFilters()).containsOnly("foo", "bar");
+        assertThat(moduleInfo.moduleClass()).isEqualTo("com.afrozaar.nimbal.test.DefaultConfiguration");
+        assertThat(moduleInfo.isReloadRequired()).isTrue();
     }
 
 }

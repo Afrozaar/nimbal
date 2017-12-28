@@ -16,7 +16,7 @@ public class ModuleInfo {
     private Integer order;
     private String name;
     private String parentModule;
-    private String parentModuleClassesOnly;
+    private boolean parentModuleClassesOnly;
     private List<String> ringFencedFilters = Collections.emptyList();
     private String moduleClass;
 
@@ -31,9 +31,7 @@ public class ModuleInfo {
 
         this.name = names.stream().filter(StringUtils::isNotBlank).findFirst().get();
         this.parentModule = StringUtils.stripToNull(module.parentModule());
-        if (parentModule == null) {
-            this.parentModuleClassesOnly = StringUtils.stripToNull(module.parentModuleClassesOnly());
-        }
+        this.parentModuleClassesOnly = module.parentModuleClassesOnly();
         this.ringFencedFilters = Arrays.asList(module.ringFenceClassBlackListRegex());
         this.moduleClass = moduleClass.getName();
     }
@@ -73,12 +71,12 @@ public class ModuleInfo {
                 + ", moduleClass=" + moduleClass + "]";
     }
 
-    public String parentModuleClassesOnly() {
+    public boolean parentModuleClassesOnly() {
         return parentModuleClassesOnly;
     }
 
     public boolean isReloadRequired() {
-        return parentModule != null || parentModuleClassesOnly != null || !ringFencedFilters.isEmpty();
+        return parentModule != null || !ringFencedFilters.isEmpty();
     }
 
 }
