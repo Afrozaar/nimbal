@@ -68,7 +68,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>4.3.13.RELEASE</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>

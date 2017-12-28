@@ -5,6 +5,8 @@ import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class ContextFactory implements ApplicationContextAware {
 
@@ -58,7 +60,6 @@ public class ContextFactory implements ApplicationContextAware {
         } else {
             return defaultParentContext;
         }
-
     }
 
     @Override
@@ -76,6 +77,32 @@ public class ContextFactory implements ApplicationContextAware {
         if (defaultParentContext != null) { // set application context has already happened
             this.defaultParentContext = new ParentContext(defaultClassLoader, defaultParentContext.getApplicationContext());
         }
+    }
+
+    public ConfigurableApplicationContext createContext(ClassLoader classLoader, String moduleClass, String moduleName, ApplicationContext parent)
+            throws ClassNotFoundException {
+        LOG.info("Loading Ashes External Module {}", moduleClass);
+        //ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader(); must do this before we call refresh
+        //Thread.currentThread().setContextClassLoader(classLoader);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.setDisplayName(moduleName);
+        context.setParent(parent);
+        context.register(classLoader.loadClass(moduleClass));
+        context.setClassLoader(classLoader);
+        LOG.info("Module {} Loaded", moduleClass);
+        //Thread.currentThread().setContextClassLoader(contextClassLoader); must call this after refresh (although we could use a separate thread and wait for the 
+        // thread to finish in which case it won't be so complex
+        return context;
+
+    }
+
+    public ConfigurableApplicationContext refreshContext(ClassLoader classLoader, ConfigurableApplicationContext context) {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader(); //must do this before we call refresh
+        Thread.currentThread().setContextClassLoader(classLoader);
+        context.refresh();
+        Thread.currentThread().setContextClassLoader(contextClassLoader);
+        return context;
+
     }
 
 }

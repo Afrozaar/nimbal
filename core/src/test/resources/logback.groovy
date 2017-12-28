@@ -6,6 +6,8 @@ appender("STDOUT", ConsoleAppender) {
 }
 
 logger("com.afrozaar", DEBUG)
+logger("com.afrozaar.nimbal", TRACE)
+logger("org.springframework.context", TRACE)
 logger("org.eclipse.aether", DEBUG)
 
 root(INFO, ["STDOUT"])
