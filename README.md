@@ -2,7 +2,7 @@
 
 In my work at Afrozaar I developed a mechanism for dynamically loading a spring context. This mechanism can reload the context after changes are made and those changes reflect.
 
-The use case that this applies to is the ability to at runtime add beans to teh application, have those beans act on events or other messages the appication sends and have those beans add to the functionality available in the core application. Basically allows you to add behaviour wihtout having to redeploy the whole application and also to deploy certain pieces of code (modules) to only one environment and thus not have that code duplicated accross all environments (which would happen if the code was deployed normally).
+The use case that this applies to is the ability to at runtime add beans to the application, have those beans act on events or other messages the appication sends and have those beans add to the functionality available in the core application. Basically allows you to add behaviour wihtout having to redeploy the whole application and also to deploy certain pieces of code (modules) to only one environment and thus not have that code duplicated accross all environments (which would happen if the code was deployed normally).
 
 This tool has been running in production for about 3 years now and has proved particularly robust and capable.
 
