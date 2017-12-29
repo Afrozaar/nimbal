@@ -108,6 +108,18 @@ public class ParentChildLoadTest {
             assertThat(supplier.get()).isEqualTo("com.afrozaar.nimbal.test.parent.ParentObject");
         }
 
+        try {
+            loader.unloadModule("ParentModule");
+            failBecauseExceptionWasNotThrown(ModuleLoadException.class);
+        } catch (ModuleLoadException mle) {
+            assertThat(mle.getMessage()).isEqualTo("cannot unloaded module ParentModule as it has dependent children " + registry.getModule("ParentModule")
+                    .getChildren()
+                    .stream().map(Module::getName).collect(Collectors.joining(",", "[", "]")));
+        }
+
+        loader.unloadModule("ChildModule");
+        loader.unloadModule("ParentModule");
+
     }
 
 }
