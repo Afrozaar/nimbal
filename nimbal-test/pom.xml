@@ -27,6 +27,7 @@
         <module>nimbal-test-module-annotation-x</module>
         <module>nimbal-test-simple-parent</module>
         <module>nimbal-test-simple-child</module>
+        <module>nimbal-test-child-classes-only</module>
     </modules>
 
 </project>

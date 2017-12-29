@@ -85,4 +85,29 @@ public class ParentChildLoadTest {
         loader.unloadModule("ParentModule");
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void LoadParentAndChildWhereDepIsClassesOnly() throws MalformedURLException, ClassNotFoundException, ErrorLoadingArtifactException, IOException,
+            ModuleLoadException {
+
+        loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-parent", "1.0.0-SNAPSHOT"));
+
+        Module loadContext = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-child-classes-only", "1.0.0-SNAPSHOT"));
+
+        Object bean = loadContext.getContext().getBean("child");
+
+        {
+            assertThat(bean).isNotNull();
+            Supplier<String> supplier = on(bean).call("getSupplier").get();
+            // this supplier that is returned is sourced form the parent context - but because dep is classes only it will be null
+            assertThat(supplier).isNull();
+        }
+
+        {
+            Supplier<String> supplier = on(bean).call("getParentObject").get();
+            assertThat(supplier.get()).isEqualTo("com.afrozaar.nimbal.test.parent.ParentObject");
+        }
+
+    }
+
 }
