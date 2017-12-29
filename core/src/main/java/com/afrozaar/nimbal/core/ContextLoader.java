@@ -7,7 +7,6 @@ import com.afrozaar.nimbal.annotations.Module;
 import com.afrozaar.nimbal.core.ContextFactory.ParentContext;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -160,7 +159,8 @@ public class ContextLoader {
         }
     }
 
-    public ApplicationContext loadContext(MavenCoords mavenCoords, Consumer<ConfigurableApplicationContext>... preRefresh) throws ErrorLoadingArtifactException,
+    public com.afrozaar.nimbal.core.Module loadContext(MavenCoords mavenCoords, Consumer<ConfigurableApplicationContext>... preRefresh)
+            throws ErrorLoadingArtifactException,
             MalformedURLException, IOException,
             ClassNotFoundException {
 
@@ -189,7 +189,13 @@ public class ContextLoader {
             Arrays.stream(preRefresh).forEach(c -> c.accept(context));
         }
 
-        return contextFactory.refreshContext(classLoader, context);
+        ConfigurableApplicationContext refreshContext = contextFactory.refreshContext(classLoader, context);
+
+        return registry.registerModule(moduleInfo.name(), refreshContext, classLoader);
+    }
+
+    public void unloadModule(String moduleName) {
+
     }
 
 }

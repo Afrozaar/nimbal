@@ -1,8 +1,6 @@
 package com.afrozaar.nimbal.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 import com.afrozaar.nimbal.core.classloader.URLClassLoaderExtension;
 
@@ -23,11 +21,13 @@ public class OrchestrationTest {
     private ApplicationContext testApplicationContext;
     private ContextLoader loader;
 
+    IRegistry registry = new SimpleRegistry();
+
     @Before
     public void setupTestAppContext() {
         this.testApplicationContext = new AnnotationConfigApplicationContext(TestConfiguration.class);
         MavenRepositoriesManager manager = setupDefaultMavenRepo();
-        IRegistry registry = mock(IRegistry.class);
+
         ClassLoaderFactory factory = new ClassLoaderFactory(registry);
         ContextFactory contextFactory = new ContextFactory(factory, registry);
         contextFactory.setApplicationContext(testApplicationContext);
@@ -38,7 +38,7 @@ public class OrchestrationTest {
     @Test
     public void LoadSimpleContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
 
-        ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple", "1.0.0-SNAPSHOT"));
+        ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple", "1.0.0-SNAPSHOT")).getContext();
 
         //LOG.info("beans now present {}", context.getBeanDefinitionNames());
         Object bean = context.getBean("getBean");
@@ -52,7 +52,8 @@ public class OrchestrationTest {
     @Test
     public void LoadComplexContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
 
-        ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation", "1.0.0-SNAPSHOT"));
+        ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation", "1.0.0-SNAPSHOT"))
+                .getContext();
 
         //LOG.info("beans now present {}", context.getBeanDefinitionNames());
         Object bean = context.getBean("getBean");
@@ -73,6 +74,41 @@ public class OrchestrationTest {
         manager.setM2Folder(".m2");
         manager.init();
         return manager;
+    }
+
+    @Test
+    public void LoadAndReloadWithChange() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
+
+        Module loadContext = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.0.0-SNAPSHOT"));
+        {
+            ApplicationContext context = loadContext
+                    .getContext();
+
+            //LOG.info("beans now present {}", context.getBeanDefinitionNames());
+            Object bean = context.getBean("getBean");
+
+            assertThat(bean).isNotNull();
+            String x = ((Supplier<String>) bean).get();
+            assertThat(x).isEqualTo("from test simple 1");
+
+            assertThat(bean.getClass().getName()).isEqualTo("com.afrozaar.nimbal.test.SpringManagedObject");
+
+            URLClassLoaderExtension extensionClassLoader = (URLClassLoaderExtension) bean.getClass().getClassLoader();
+
+            assertThat(extensionClassLoader.getName()).isEqualTo("nimbal-test-module-annotation");
+            assertThat(loadContext.getName()).isEqualTo("DefaultConfiguration");
+        }
+        // unload module
+        loader.unloadModule(loadContext.getName());
+
+        loadContext = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.1.0-SNAPSHOT"));
+        {
+            Object bean = loadContext.getContext().getBean("getBean");
+
+            assertThat(bean).isNotNull();
+            String x = ((Supplier<String>) bean).get();
+            assertThat(x).isEqualTo("from test simple 2");
+        }
     }
 
 }
