@@ -7,6 +7,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>nimbal-test</artifactId>
+    <groupId>com.afrozaar.nimbal.test</groupId>
     <packaging>pom</packaging>
     <name>Test Pom</name>
     <modules>
@@ -16,5 +17,9 @@
         <module>nimbal-test-module-annotation-with-label</module>
         <module>nimbal-test-module-complex-annotation</module>
         <module>nimbal-test-module-complex-annotation-for-test</module>
+        <module>nimbal-test-module-annotation-x</module>
+        <module>nimbal-test-simple-parent</module>
+        <module>nimbal-test-simple-child</module>
     </modules>
+
 </project>
