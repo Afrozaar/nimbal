@@ -15,10 +15,10 @@ So far I have ported/migrated/rewritten
 *   Ability to dynamically load a spring context
 * Unloading a spring context
 * allow one "module" to depend on another modules classes and application context
+* allow one module to to depend on only another modules classes
 
 Still to come features are:
 
-* allow one module to to depend on only another modules classes
 * registering the modules so that their classes and application contexts are available to the wider application
 * Ability to plugin to a main app (currently only runs as tests)
 * Ability to persist the loaded modules state so that on startup they can be reloaded
