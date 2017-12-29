@@ -7,7 +7,7 @@ public class SpringManagedObject implements Supplier<String> {
 
     @Override
     public String get() {
-        return "from test simple 1";
+        return "from test simple 2";
     }
 
 }
