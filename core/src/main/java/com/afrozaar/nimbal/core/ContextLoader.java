@@ -7,7 +7,6 @@ import com.afrozaar.nimbal.annotations.Module;
 import com.afrozaar.nimbal.core.ContextFactory.ParentContext;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +35,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ContextLoader {
 
@@ -160,7 +160,8 @@ public class ContextLoader {
         }
     }
 
-    public ApplicationContext loadContext(MavenCoords mavenCoords, Consumer<ConfigurableApplicationContext>... preRefresh) throws ErrorLoadingArtifactException,
+    public com.afrozaar.nimbal.core.Module loadContext(MavenCoords mavenCoords, Consumer<ConfigurableApplicationContext>... preRefresh)
+            throws ErrorLoadingArtifactException, ModuleLoadException,
             MalformedURLException, IOException,
             ClassNotFoundException {
 
@@ -172,6 +173,10 @@ public class ContextLoader {
                 .getArtifact().getFile()
                 .getAbsolutePath()), jars);
 
+        if (registry.getModule(moduleInfoAndClassLoader.getModuleInfo().name()) != null) {
+            throw new ModuleLoadException("module {} is already loaded, cannot reload until existing module is unloaded", moduleInfoAndClassLoader
+                    .getModuleInfo().name());
+        }
         // if we discover meta data on the module that is only available in the construct of a class loader (parent class loader for example) we need to recreate the class
         // loader with this info
         ClassLoader classLoader = moduleInfoAndClassLoader.getModuleInfo().isReloadRequired() ? classLoaderFactory.getClassLoader(moduleInfoAndClassLoader
@@ -189,7 +194,19 @@ public class ContextLoader {
             Arrays.stream(preRefresh).forEach(c -> c.accept(context));
         }
 
-        return contextFactory.refreshContext(classLoader, context);
+        ConfigurableApplicationContext refreshContext = contextFactory.refreshContext(classLoader, context);
+
+        return registry.registerModule(moduleInfo, refreshContext, classLoader);
+    }
+
+    public void unloadModule(String moduleName) throws ModuleLoadException {
+        com.afrozaar.nimbal.core.Module module = registry.getModule(moduleName);
+        if (!module.getChildren().isEmpty()) {
+            throw new ModuleLoadException("cannot unloaded module {} as it has dependent children {}", moduleName, module.getChildren()
+                    .stream().map(com.afrozaar.nimbal.core.Module::getName).collect(Collectors.joining(",", "[", "]")));
+        }
+        module.getContext().close();
+        registry.deregister(moduleName);
     }
 
 }

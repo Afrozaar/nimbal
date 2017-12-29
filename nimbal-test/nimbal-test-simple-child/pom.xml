@@ -6,10 +6,20 @@
         <artifactId>nimbal-test</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.afrozaar.nimbal.test</groupId>
-    <artifactId>nimbal-test-module-complex-annotation-for-test</artifactId>
+    <artifactId>nimbal-test-child</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.3.13.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.afrozaar.nimbal.test</groupId>
+            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>nimbal-test-simple-parent</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.afrozaar.nimbal</groupId>
             <artifactId>nimbal-annotations</artifactId>
