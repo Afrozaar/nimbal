@@ -36,7 +36,7 @@ public class OrchestrationTest {
     }
 
     @Test
-    public void LoadSimpleContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
+    public void LoadSimpleContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException, ModuleLoadException {
 
         ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-simple", "1.0.0-SNAPSHOT")).getContext();
 
@@ -50,7 +50,7 @@ public class OrchestrationTest {
     }
 
     @Test
-    public void LoadComplexContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
+    public void LoadComplexContext() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException, ModuleLoadException {
 
         ApplicationContext context = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-complex-annotation", "1.0.0-SNAPSHOT"))
                 .getContext();
@@ -77,12 +77,12 @@ public class OrchestrationTest {
     }
 
     @Test
-    public void LoadAndReloadWithChange() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException {
+    public void LoadAndReloadWithChange() throws ErrorLoadingArtifactException, MalformedURLException, IOException, ClassNotFoundException,
+            ModuleLoadException {
 
-        Module loadContext = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.0.0-SNAPSHOT"));
+        String name = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.0.0-SNAPSHOT")).getName();
         {
-            ApplicationContext context = loadContext
-                    .getContext();
+            ApplicationContext context = registry.getModule(name).getContext();
 
             //LOG.info("beans now present {}", context.getBeanDefinitionNames());
             Object bean = context.getBean("getBean");
@@ -96,14 +96,14 @@ public class OrchestrationTest {
             URLClassLoaderExtension extensionClassLoader = (URLClassLoaderExtension) bean.getClass().getClassLoader();
 
             assertThat(extensionClassLoader.getName()).isEqualTo("nimbal-test-module-annotation");
-            assertThat(loadContext.getName()).isEqualTo("DefaultConfiguration");
+            assertThat(name).isEqualTo("DefaultConfiguration");
         }
         // unload module
-        loader.unloadModule(loadContext.getName());
+        loader.unloadModule(name);
 
-        loadContext = loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.1.0-SNAPSHOT"));
+        loader.loadContext(new MavenCoords("com.afrozaar.nimbal.test", "nimbal-test-module-annotation", "1.1.0-SNAPSHOT"));
         {
-            Object bean = loadContext.getContext().getBean("getBean");
+            Object bean = registry.getModule(name).getContext().getBean("getBean");
 
             assertThat(bean).isNotNull();
             String x = ((Supplier<String>) bean).get();

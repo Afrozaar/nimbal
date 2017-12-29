@@ -9,6 +9,7 @@ import com.afrozaar.nimbal.core.ContextFactory.ParentContext;
 import com.afrozaar.nimbal.core.classloader.ClassLoaderFactory;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,10 +61,9 @@ public class ContextFactoryTest {
         String parentModule = "foo";
         module.setParentModule(parentModule);
 
-        ApplicationContext mockApplicationContext = mock(ApplicationContext.class);
-        when(registry.getContext(parentModule)).thenReturn(mockApplicationContext);
+        ConfigurableApplicationContext mockApplicationContext = mock(ConfigurableApplicationContext.class);
         ClassLoader mockClassLoader = mock(ClassLoader.class);
-        when(registry.getClassLoader(parentModule)).thenReturn(mockClassLoader);
+        when(registry.getModule(parentModule)).thenReturn(new Module("bar", mockClassLoader, mockApplicationContext));
 
         ParentContext parentContext = contextFactory.getParentContext(module);
 
@@ -82,10 +82,10 @@ public class ContextFactoryTest {
         module.setParentClassLoaderOnly(true);
         module.setParentModule(parentModule);
 
-        ApplicationContext mockApplicationContext = mock(ApplicationContext.class);
-        when(registry.getContext(parentModule)).thenReturn(mockApplicationContext);
+        ConfigurableApplicationContext mockApplicationContext = mock(ConfigurableApplicationContext.class);
         ClassLoader mockClassLoader = mock(ClassLoader.class);
-        when(registry.getClassLoader(parentModule)).thenReturn(mockClassLoader);
+
+        when(registry.getModule(parentModule)).thenReturn(new Module("bar", mockClassLoader, mockApplicationContext));
 
         ParentContext parentContext = contextFactory.getParentContext(module);
 
