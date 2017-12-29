@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.afrozaar.nimbal.test</groupId>
             <version>1.0.0-SNAPSHOT</version>
-            <artifactId>nimbal-test-simple-parent</artifactId>
+            <artifactId>nimbal-test-parent</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
