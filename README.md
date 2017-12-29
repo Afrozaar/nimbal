@@ -13,14 +13,13 @@ The modules that are loaded must have an @Configuration somewhere or the custom 
 So far I have ported/migrated/rewritten
 
 *   Ability to dynamically load a spring context
+* Unloading a spring context
+* allow one "module" to depend on another modules classes and application context
 
 Still to come features are:
 
-* Unloading a spring context
-* allow one "module" to depend on another modules classes and application context
 * allow one module to to depend on only another modules classes
 * registering the modules so that their classes and application contexts are available to the wider application
-* allow the customising of the contexts before they are refreshed - this means you can for example add configuration properties or add a bean post processor to act on relevant beans.
 * Ability to plugin to a main app (currently only runs as tests)
 * Ability to persist the loaded modules state so that on startup they can be reloaded
 * Clustering support
