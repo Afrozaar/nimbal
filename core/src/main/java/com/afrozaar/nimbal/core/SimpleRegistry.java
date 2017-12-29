@@ -1,8 +1,5 @@
 package com.afrozaar.nimbal.core;
 
-import static java.util.Optional.ofNullable;
-
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.LinkedHashMap;
@@ -15,21 +12,38 @@ public class SimpleRegistry implements IRegistry {
     Map<String, Module> map = new LinkedHashMap<>();
 
     @Override
-    public ClassLoader getClassLoader(String name) {
-        return ofNullable(map.get(name)).map(Module::getClassLoader).orElse(null);
-    }
+    public Module registerModule(ModuleInfo moduleInfo, ConfigurableApplicationContext context, ClassLoader classLoader) throws ModuleLoadException {
+        Module value = new Module(moduleInfo.name(), classLoader, context);
 
-    @Override
-    public ApplicationContext getContext(String name) {
-        return ofNullable(map.get(name)).map(Module::getContext).orElse(null);
-    }
-
-    @Override
-    public Module registerModule(String name, ConfigurableApplicationContext context, ClassLoader classLoader) {
-        Module value = new Module(name, classLoader, context);
-        map.put(name, value);
+        if (moduleInfo.parentModule() != null) {
+            Module parent = map.get(moduleInfo.parentModule());
+            boolean addChild = parent.addChild(value);
+            if (addChild) {
+                value.setParent(parent);
+            } else {
+                throw new ModuleLoadException("parent module {} already has this module {} as a child", moduleInfo.parentModule(), moduleInfo.name());
+            }
+        }
+        map.put(moduleInfo.name(), value);
         return value;
 
+    }
+
+    @Override
+    public Module getModule(String name) {
+        return map.get(name);
+    }
+
+    @Override
+    public boolean deregister(String moduleName) {
+        Module module = map.get(moduleName);
+        // remove myself from my parent
+        Module parent = module.getParent();
+        if (parent != null) {
+            parent.removeChild(module);
+            module.setParent(null);
+        }
+        return map.remove(moduleName) != null;
     }
 
 }

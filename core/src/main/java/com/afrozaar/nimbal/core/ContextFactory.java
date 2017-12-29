@@ -46,18 +46,17 @@ public class ContextFactory implements ApplicationContextAware {
 
         String parentName = module.parentModule();
         if (parentName != null) {
-            ApplicationContext parentContext = registry.getContext(parentName);
-            if (parentContext == null && !module.parentModuleClassesOnly()) {
+            Module parentModule = registry.getModule(parentName);
+            if (parentModule == null) {
                 throw new ErrorLoadingArtifactException("module {} required parent module {} but is not present.", module.name(), parentName);
             }
-            ClassLoader classLoader = registry.getClassLoader(parentName);
-            if (classLoader == null) {
-                throw new ErrorLoadingArtifactException("loading module {} requires class loader for {} and it was not found.", parentName);
-            }
+            ApplicationContext parentContext;
             if (module.parentModuleClassesOnly()) {
                 parentContext = defaultParentContext.getApplicationContext();
+            } else {
+                parentContext = parentModule.getContext();
             }
-            return new ParentContext(classLoader, parentContext);
+            return new ParentContext(parentModule.getClassLoader(), parentContext);
         } else {
             return defaultParentContext;
         }

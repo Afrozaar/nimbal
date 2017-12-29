@@ -1,14 +1,13 @@
 package com.afrozaar.nimbal.core;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public interface IRegistry {
 
-    ClassLoader getClassLoader(String parentName);
+    Module getModule(String name);
 
-    ApplicationContext getContext(String parentName);
+    Module registerModule(ModuleInfo moduleInfo, ConfigurableApplicationContext refreshContext, ClassLoader classLoader) throws ModuleLoadException;
 
-    Module registerModule(String name, ConfigurableApplicationContext refreshContext, ClassLoader classLoader);
+    boolean deregister(String moduleName);
 
 }

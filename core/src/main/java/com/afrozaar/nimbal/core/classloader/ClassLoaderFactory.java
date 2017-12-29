@@ -37,7 +37,7 @@ public class ClassLoaderFactory {
 
     private ClassLoader getParentClassLoader(String parentName) throws ErrorLoadingArtifactException {
         if (parentName != null) {
-            ClassLoader parentClassLoader = registry.getClassLoader(parentName);
+            ClassLoader parentClassLoader = registry.getModule(parentName).getClassLoader();
             if (parentClassLoader == null) {
                 throw new ErrorLoadingArtifactException("no parent class loader found for parent {}", parentName);
             }
